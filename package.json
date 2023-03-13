@@ -1,0 +1,25 @@
+{
+  "name": "download-gateway",
+  "version": "1.0.0",
+  "description": "Frontend service to download dashboard queries as EXCEL workbooks",
+  "main": "src/index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "main": "node src/index.mjs"
+  },
+  "author": "ZHAW ICLS (Christian Glahn)",
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "8.36.0",
+    "eslint": "8.36.0",
+    "globals": "13.20.0"
+  },
+  "dependencies": {
+    "@koa/router": "12.0.0",
+    "exceljs": "4.3.0",
+    "koa": "2.14.1",
+    "koa-compose": "4.1.0",
+    "service-logger": "github:phish108/node-service-logger",
+    "yaml": "2.2.1"
+  }
+}
