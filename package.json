@@ -19,7 +19,7 @@
     "exceljs": "4.3.0",
     "koa": "2.14.1",
     "koa-compose": "4.1.0",
-    "service-logger": "github:phish108/node-service-logger",
+    "service-logger": "github:phish108/node-service-logger#1c43af5",
     "yaml": "2.2.1"
   }
 }
