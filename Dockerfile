@@ -9,7 +9,7 @@ COPY src /app/src/
 
 WORKDIR /app
 RUN adduser -S sdgservice && \
-    npm ci --omit=dev && \
+    npm ci --omit dev && \
     chown -R sdgservice /app
 
 USER sdgservice
