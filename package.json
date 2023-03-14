@@ -5,7 +5,7 @@
   "main": "src/index.mjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "main": "node src/index.mjs"
+    "start": "node src/index.mjs"
   },
   "author": "ZHAW ICLS (Christian Glahn)",
   "license": "MIT",
@@ -20,7 +20,7 @@
     "koa": "2.14.1",
     "koa-compose": "4.1.0",
     "koa-body": "6.0.1",
-    "service-logger": "github:phish108/node-service-logger#1c43af5",
+    "service_logger": "github:phish108/node-service-logger#1c43af5",
     "yaml": "2.2.1"
   }
 }
