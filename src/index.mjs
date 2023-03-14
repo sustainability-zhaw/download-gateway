@@ -7,6 +7,11 @@ import {getLogger} from "service_logger";
 
 import Config from "./config/index.mjs";
 
+import { 
+    logHeader, 
+    logRequest
+} from "./handler/index.mjs";
+
 const log = getLogger("index");
 
 const defaults = {

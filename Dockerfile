@@ -13,4 +13,4 @@ RUN adduser -S sdgservice && \
     chown -R sdgservice /app
 
 USER sdgservice
-ENTRYPOINT [ "/usr/local/bin/npm", "start" ]
+ENTRYPOINT [ "/usr/local/bin/npm", "start", "-q" ]
