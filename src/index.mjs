@@ -7,8 +7,9 @@ import {getLogger} from "service_logger";
 
 import Config from "./config/index.mjs";
 
-import { 
-    logHeader, 
+import {
+    logHeader,
+    checkquery,
     logRequest
 } from "./handler/index.mjs";
 
@@ -24,13 +25,14 @@ const defaults = {
     }
 };
 
-async function setup_service(config) {
+async function setup_service() {
     const app = new Koa();
     const router = new Router;
 
     const loaderPipeline = KoaCompose([
         // normally we will not enter here
         logHeader,
+        checkquery,
         logRequest
     ]);
 
@@ -60,7 +62,7 @@ async function prepare() {
     }
 
     cfg.logLevel(); // set log-level
-    
+
     return cfg;
 }
 

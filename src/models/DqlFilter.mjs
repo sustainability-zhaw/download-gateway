@@ -9,7 +9,7 @@ export async function fetchData(body, RequestController) {
     const cache = "no-store";
 
     const headers = {
-        'Content-Type': 'application/dql'
+        "Content-Type": "application/dql"
     };
 
     // Logger.debug(`fetch stats from ${url}`);
@@ -24,7 +24,7 @@ export async function fetchData(body, RequestController) {
     });
 
     const result = await response.json();
-    
+
     if ("data" in result && result.data) {
         return result.data;
     }
@@ -38,7 +38,7 @@ export async function fetchData(body, RequestController) {
 export async function buildAndFetch(queryObj, type, RequestController, selectorFunc, options) {
     const {filter, handler} = buildFilter(queryObj, type);
 
-    const query = `query { ${handler} ${selectorFunc(filter, options)} }`
+    const query = `query { ${handler} ${selectorFunc(filter, options)} }`;
 
     Logger.debug(`fetch query "${query}"`);
 
@@ -49,59 +49,59 @@ export async function buildAndFetch(queryObj, type, RequestController, selectorF
 
 export function mainQuery(queryObj, RequestController) {
     return buildAndFetch(
-        queryObj, 
-        "InfoObject", 
-        RequestController, 
+        queryObj,
+        "InfoObject",
+        RequestController,
         mainSelector
-        );
+    );
 }
 
 export function objectsQuery(category, limit, offset, queryObj, RequestController) {
     return buildAndFetch(
-        queryObj, 
-        "InfoObject", 
-        RequestController, 
-        objectSelector, 
+        queryObj,
+        "InfoObject",
+        RequestController,
+        objectSelector,
         {category, limit, offset}
     );
 }
 
 export function peopleQuery(limit, offset, queryObj, RequestController) {
     return buildAndFetch(
-        queryObj, 
-        "InfoObject", 
-        RequestController, 
-        peopleSelector, 
+        queryObj,
+        "InfoObject",
+        RequestController,
+        peopleSelector,
         {limit, offset}
     );
 }
 
 export function contributorQuery(category, limit, offset, queryObj, RequestController) {
     return buildAndFetch(
-        queryObj, 
-        "InfoObject", 
-        RequestController, 
-        contributorSelector, 
+        queryObj,
+        "InfoObject",
+        RequestController,
+        contributorSelector,
         {category, limit, offset}
     );
 }
 
 export function statQuery(category, queryObj, RequestController) {
     return buildAndFetch(
-        queryObj, 
-        "InfoObject", 
-        RequestController, 
-        statSelector, 
+        queryObj,
+        "InfoObject",
+        RequestController,
+        statSelector,
         {category}
     );
 }
 
 export function indexQuery(queryObj, limit, offset, RequestController) {
     return buildAndFetch(
-        queryObj, 
-        "SdgMatch", 
-        RequestController, 
-        matchSelector, 
+        queryObj,
+        "SdgMatch",
+        RequestController,
+        matchSelector,
         {limit, offset}
     );
 }
@@ -145,7 +145,7 @@ function buildFilter(queryObj, refType) {
         const tf = buildMatchTermFilter(queryObj);
 
         if (tf && tf.length){
-             aFilter.push(tf);
+            aFilter.push(tf);
         }
     }
     else {
@@ -172,7 +172,7 @@ function buildFilter(queryObj, refType) {
 }
 
 function mainSelector(filter) {
-    filter = (filter && filter.length) ? ` @filter(${filter})` : "";
+    filter = filter && filter.length ? ` @filter(${filter})` : "";
 
     const aHelper = filter.length ? `aph as var(func: type(Author)) @cascade { Author.objects${filter} { uid } }` : "";
     const pHelper = filter.length ? " @filter(uid_in(Person.pseudonyms, uid(aph)))" : "";
@@ -196,7 +196,8 @@ function mainSelector(filter) {
 function statSelector(filter, options) {
     // limit and offset are deliberately ignored in this query
     const {category} = options || {};
-    filter = (filter && filter.length) ? ` and ${filter}` : "";
+
+    filter = filter && filter.length ? ` and ${filter}` : "";
     return `
     categ as var(func: type(InfoObjectType)) @filter(eq(InfoObjectType.name, ${JSON.stringify(category)})) {
         uid
@@ -216,7 +217,7 @@ function statSelector(filter, options) {
 function contributorSelector(filter, options) {
     const {category, limit, offset} = options || {};
 
-    filter = (filter && filter.length) ? ` and ${filter}` : "";
+    filter = filter && filter.length ? ` and ${filter}` : "";
     return `
         categ as var(func: type(InfoObjectType)) @filter(eq(InfoObjectType.name, ${JSON.stringify(category)})) {
             uid
@@ -253,7 +254,7 @@ function contributorSelector(filter, options) {
 function objectSelector(filter, options) {
     const {category, limit, offset} = options;
 
-    filter = (filter && filter.length) ? ` @filter(${filter})` : "";
+    filter = filter && filter.length ? ` @filter(${filter})` : "";
 
     return `
     category(func: eq(InfoObjectType.name, ${JSON.stringify(category)})) {
@@ -327,7 +328,8 @@ function matchSelector(filter, options) {
 
 function peopleSelector(filter, options) {
     const {limit, offset} = options;
-    filter = filter && filter.length ? ` @filter(${filter})` : ""
+
+    filter = filter && filter.length ? ` @filter(${filter})` : "";
 
     return `
     pps as var(func: has(Person.pseudonyms)) {
@@ -370,23 +372,24 @@ function buildEdgeHandler(type, value, id) {
 
 function buildUidFilter(type, id, refType) {
     const firstChar = type.trim().charAt(0);
+
     refType = refType && refType.length ? refType : "InfoObject";
 
     if (!["sdg", "department", "person"].includes(type)) {
         return "";
     }
 
-    return `uid_in(${refType}.${type === "person" ? "author" : type}${refType === "InfoObject"? "s" : ""}, uid(${firstChar}h${id}))`;
+    return `uid_in(${refType}.${type === "person" ? "author" : type}${refType === "InfoObject" ? "s" : ""}, uid(${firstChar}h${id}))`;
 }
 
 function buildTermFilter(type, term) {
-    const not = (type !== "term");
+    const not = type !== "term";
 
     return `${not ? "not" : ""}(alloftext(InfoObject.title, ${term}) or alloftext(InfoObject.abstract, ${term}) or alloftext(InfoObject.extras, ${term}))`;
 }
 
 function buildLangFilter(lang, type) {
-    return `eq(${type}.language, ${lang.toLowerCase()})`
+    return `eq(${type}.language, ${lang.toLowerCase()})`;
 }
 
 function buildMatchTermFilter(queryObj) {

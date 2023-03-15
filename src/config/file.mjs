@@ -131,7 +131,7 @@ function loadFileWithFormat(file) {
 
     file = file.replace(/^file:\/\//, "");
 
-    const ext = /\.(.*?)$/.exec(file)?.pop();
+    // const ext = /\.(.*?)$/.exec(file)?.pop();
     let fmt = "yaml";
 
     return loadFile(file, fmt);
