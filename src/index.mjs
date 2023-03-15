@@ -59,7 +59,7 @@ async function prepare() {
         throw new Error("no configuration");
     }
 
-    cfg.logLevel(); // set loglevel
+    cfg.logLevel(); // set log-level
     
     return cfg;
 }
