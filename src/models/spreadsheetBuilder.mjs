@@ -28,7 +28,7 @@ const fieldMatrices = {
 const columnSpec = {
 };
 
-export async function buildSpreadSheet(category, data) {
+export function buildSpreadSheet(category, data) {
     const workbook = new Excel.Workbook();
 
     const worksheet = workbook.addWorksheet(category);
@@ -38,5 +38,5 @@ export async function buildSpreadSheet(category, data) {
         return sheet; 
     }, worksheet);
 
-    await workbook.xlsx.writeFile("example.xlsx");
+    return workbook;
 }
