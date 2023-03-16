@@ -9,8 +9,8 @@ export function init(config) {
         throw new Error("no dbhost found");
     }
 
-    settings.dqlUri = `${config.dbhost}/query`;
-    settings.gqlUri = `${config.dbhost}/graphql`;
+    settings.dqlUri = `http://${config.dbhost}/query`;
+    settings.gqlUri = `http://${config.dbhost}/graphql`;
 }
 
 export async function fetchData(body, RequestController) {
