@@ -7,11 +7,14 @@ import {getLogger} from "service_logger";
 
 import Config from "./config/index.mjs";
 
+import * as DQL from "./models/DqlFilter.mjs";
+
 import {
     logHeader,
     logRequest,
     checkquery,
-    buildfile
+    buildfile,
+    respondHelo
 } from "./handler/index.mjs";
 
 const log = getLogger("index");
@@ -30,22 +33,28 @@ async function setup_service() {
     const app = new Koa();
     const router = new Router;
 
-    const loaderPipeline = KoaCompose([
+    router.get("/", KoaCompose([
+        // normally we will not enter here
+        logHeader,
+        respondHelo,
+        logRequest
+    ]));
+
+    router.post("/", koaBody.koaBody(), KoaCompose([
         // normally we will not enter here
         logHeader,
         checkquery,
         buildfile,
         logRequest
-    ]);
-
-    router.get("/", KoaCompose([
+    ]));
+    
+    router.put("/", koaBody.koaBody(), KoaCompose([
         // normally we will not enter here
         logHeader,
+        checkquery,
+        buildfile,
         logRequest
     ]));
-
-    router.post("/query", koaBody.koaBody(), loaderPipeline);
-    router.put("/query", koaBody.koaBody(), loaderPipeline);
 
     app.use(router.routes());
 
@@ -70,6 +79,9 @@ async function prepare() {
 
 async function main() {
     const config = await prepare();
+
+    DQL.init(config.service);
+
     const server = await setup_service(config);
 
     server.run();

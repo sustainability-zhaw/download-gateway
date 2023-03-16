@@ -12,7 +12,7 @@ const log = getLogger("handler/buildfile");
 export async function buildfile(ctx, next) {
     try {
         const data = await mainQuery(ctx.dql_query, ctx.dql_category, new AbortController());
-        const workbook = buildSpreadSheet(ctx.dql_category, data);
+        const workbook = buildSpreadSheet(ctx.dql_category, data.category[0].objects);
 
         if (!workbook) {
             log.error("workbook generation failed");
@@ -29,7 +29,7 @@ export async function buildfile(ctx, next) {
         ctx.throw(400, "failed to build a file");
     }
 
-    ctx.response.set("content/type", mimetype);
+    ctx.response.set("content-type", mimetype);
     ctx.response.set("content-disposition", `attachment; filename=${filename}`);
 
     await next();

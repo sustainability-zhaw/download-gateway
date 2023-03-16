@@ -1,4 +1,7 @@
 import Excel from "exceljs";
+import {getLogger} from "service_logger";
+
+const log = getLogger("models/spreadsheetBuilder");
 
 const fieldOrder = [
     "link",
@@ -16,20 +19,20 @@ const fieldOrder = [
 ];
 
 function mapjoin(entry) {
-    return (f) => f.map(field => field[entry]).join(", ");
+    return (f) => f ? f.map(field => field[entry]).join(", ") : "";
 }
 
 function mapjoinauthors() {
-    return (f) => f.map(field => field.fullname + (field["person"] !== null ? ` (${field.person.initials}, ${field.person.department.id.replace("department_", "")})` : "")).join("; ");
+    return (f) => f ? f.map(field => field.fullname + (field.person ? ` (${field.person.initials}, ${field.person.department?.id.replace("department_", "")})` : "")).join("; ") : "";
 }
 
 function mapmatrix(id) {
-    return x => fieldMatrices[id].map(id => 1 * x.map(o => o.id).includes(id));
+    return x => fieldMatrices[id] ? fieldMatrices[id].map(id => 1 * (x ? x.map(o => o.id).includes(id) : 0)) : 0;
 }
 
 const fieldHandler = {
     authors: mapjoinauthors(),
-    subtype: (t) => t.name,
+    subtype: (t) => typeof t === "object" ? t.name : "",
     keywords: mapjoin("name"),
     class: mapjoin("id"),
     sdgs: mapmatrix("sdgs"),
@@ -47,6 +50,23 @@ const fieldMatrices = {
 };
 
 export function buildSpreadSheet(category, data) {
+    if (!Array.isArray(data)) {
+        log.error("data is not an array");
+        log.data(data);
+        throw new Error("data is not an array");
+    }
+
+    if (!data.length) {
+        log.error("query returned no data");
+        log.data(data);
+        throw new Error("query returned no data");
+    }
+
+    log.debug(`report ${data.length} records as excel table`);
+
+
+    log.debug(data);
+
     const workbook = new Excel.Workbook();
 
     const worksheet = workbook.addWorksheet(category);
@@ -70,6 +90,7 @@ export function buildSpreadSheet(category, data) {
         rows: [],
     });
 
+    log.debug("prepare Headers");
     data.reduce((tab, obj, id) => {
         id += 1;
         const row = fieldOrder.map(k => k in fieldHandler ? fieldHandler[k](obj[k]) : obj[k]).flat();
@@ -78,6 +99,7 @@ export function buildSpreadSheet(category, data) {
         return tab;
     }, table);
 
+    log.debug("reduce to row");
     columns.reduce((tab, cn, id) => {
         // id += 1;
         if (["authors", "title"].includes(cn.name)) {

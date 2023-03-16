@@ -15,6 +15,9 @@ export function init(config) {
 
 export async function fetchData(body, RequestController) {
     const url = settings.dqlUri;
+
+    log.debug(url);
+
     const {signal} = RequestController;
     const method = "POST"; // all requests are POST requests
 
@@ -281,7 +284,7 @@ function objectSelector(filter, options) {
     if (offset !== undefined) {
         extras.push(`offset: ${offset}`);
     }
-    
+
     if (extras.length) {
         extras.push("");
     }
@@ -302,11 +305,11 @@ function objectSelector(filter, options) {
           authors: InfoObject.authors {
             fullname: Author.fullname
             person: Author.person {
-                qvalue.person: Person.initials
+                initials: Person.initials
                 firstname: Person.givenname
                 lastname: Person.surname
                 displayname: Person.displayname
-                department.affiliation: Person.department {
+                department: Person.department {
                     id: Department.id
                 }
             }
