@@ -1,0 +1,19 @@
+services:
+  dlgw: 
+    build:
+      context: ..
+    networks:
+    - dgraphnet
+    configs:
+    - source: dlgw_config
+      target: /etc/app/config.yaml
+
+networks:
+  dgraphnet:
+    name: integration-test_dgraphnet
+    external: true
+      
+
+configs:
+  dlgw_config:
+    file: ./dlgw.yaml

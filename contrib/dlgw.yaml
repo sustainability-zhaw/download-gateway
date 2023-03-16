@@ -1,0 +1,4 @@
+service:
+  dbhost: http://integration-test-db-1:8080
+debug:
+  level: debug
