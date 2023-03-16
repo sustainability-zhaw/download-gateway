@@ -84,28 +84,6 @@ export default class FileBackend {
 
     // resolve files linked in the target or the user
     async resolve() {
-        if (typeof this.#config.user === "string") {
-            // handle user file
-            // user file must be in YAML
-            this.#config.user = await loadFileWithFormat(this.#config.user);
-        }
-
-        if (typeof this.#config.targets === "string") {
-            // handle user file
-            // user file must be in YAML
-            this.#config.targets = await loadFileWithFormat(this.#config.targets);
-        }
-
-        await Promise.all(
-            Object.keys(this.#config.targets).map(async (T) => {
-                this.#config.targets[T] = await loadFileWithFormat(this.#config.targets[T]);
-                await Promise.all(
-                    Object.keys(this.#config.targets[T]).map(async (K) => {
-                        this.#config.targets[T][K] = await loadFileWithFormat(this.#config.targets[T][K]);
-                    })
-                );
-            })
-        );
     }
 
     get service() {
@@ -122,20 +100,20 @@ export default class FileBackend {
 }
 
 
-function loadFileWithFormat(file) {
-    if (!(typeof file === "string" && file.startsWith("file://"))) {
-        return file;
-    }
+// function loadFileWithFormat(file) {
+//     if (!(typeof file === "string" && file.startsWith("file://"))) {
+//         return file;
+//     }
 
-    log.info(`handle file ${file}`);
+//     log.info(`handle file ${file}`);
 
-    file = file.replace(/^file:\/\//, "");
+//     file = file.replace(/^file:\/\//, "");
 
-    // const ext = /\.(.*?)$/.exec(file)?.pop();
-    let fmt = "yaml";
+//     // const ext = /\.(.*?)$/.exec(file)?.pop();
+//     let fmt = "yaml";
 
-    return loadFile(file, fmt);
-}
+//     return loadFile(file, fmt);
+// }
 
 async function loadFile(file, format) {
     let result = {};
