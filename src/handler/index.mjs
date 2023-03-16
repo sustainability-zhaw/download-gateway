@@ -3,3 +3,4 @@ export {logHeader} from "./logheader.mjs";
 export {logRequest} from "./logrequest.mjs";
 export {checkquery} from "./checkquery.mjs";
 export {buildfile} from "./buildfile.mjs";
+export {respondHelo} from "./respondHelo.mjs";
