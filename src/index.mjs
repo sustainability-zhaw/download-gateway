@@ -9,8 +9,9 @@ import Config from "./config/index.mjs";
 
 import {
     logHeader,
+    logRequest,
     checkquery,
-    logRequest
+    buildfile
 } from "./handler/index.mjs";
 
 const log = getLogger("index");
@@ -33,6 +34,7 @@ async function setup_service() {
         // normally we will not enter here
         logHeader,
         checkquery,
+        buildfile,
         logRequest
     ]);
 

@@ -1,8 +1,20 @@
-import * as Config from "./Config.mjs";
-import * as Logger from "../Logger.mjs";
+import {getLogger} from "service_logger";
+
+const log = getLogger("models/DQLFilter");
+
+const settings = {};
+
+export function init(config) {
+    if (!("dbhost" in config)) {
+        throw new Error("no dbhost found");
+    }
+
+    settings.dqlUri = `${config.dbhost}/query`;
+    settings.gqlUri = `${config.dbhost}/graphql`;
+}
 
 export async function fetchData(body, RequestController) {
-    const url = Config.initDQLUri();
+    const url = settings.dqlUri;
     const {signal} = RequestController;
     const method = "POST"; // all requests are POST requests
 
@@ -13,7 +25,7 @@ export async function fetchData(body, RequestController) {
     };
 
     // Logger.debug(`fetch stats from ${url}`);
-    Logger.debug(body);
+    log.debug(body);
 
     const response = await fetch(url, {
         signal,
@@ -26,10 +38,11 @@ export async function fetchData(body, RequestController) {
     const result = await response.json();
 
     if ("data" in result && result.data) {
+        log.data(result.data);
         return result.data;
     }
 
-    Logger.info(`error response: \n ${ JSON.stringify(result, null, "  ") }`);
+    log.info({info: "error response", result});
 
     return {};
 }
@@ -40,23 +53,26 @@ export async function buildAndFetch(queryObj, type, RequestController, selectorF
 
     const query = `query { ${handler} ${selectorFunc(filter, options)} }`;
 
-    Logger.debug(`fetch query "${query}"`);
+    log.debug(`fetch query "${query}"`);
 
     const resultData = await fetchData(query, RequestController);
 
     return resultData;
 }
 
-export function mainQuery(queryObj, RequestController) {
+export function mainQuery(queryObj, category, RequestController) {
+    log.notice("mainQuery");
     return buildAndFetch(
         queryObj,
         "InfoObject",
         RequestController,
-        mainSelector
+        objectSelector,
+        {category}
     );
 }
 
 export function objectsQuery(category, limit, offset, queryObj, RequestController) {
+    log.notice("objectsQuery");
     return buildAndFetch(
         queryObj,
         "InfoObject",
@@ -67,6 +83,7 @@ export function objectsQuery(category, limit, offset, queryObj, RequestControlle
 }
 
 export function peopleQuery(limit, offset, queryObj, RequestController) {
+    log.notice("peopleQuery");
     return buildAndFetch(
         queryObj,
         "InfoObject",
@@ -77,6 +94,7 @@ export function peopleQuery(limit, offset, queryObj, RequestController) {
 }
 
 export function contributorQuery(category, limit, offset, queryObj, RequestController) {
+    log.notice("contributorQuery");
     return buildAndFetch(
         queryObj,
         "InfoObject",
@@ -87,6 +105,7 @@ export function contributorQuery(category, limit, offset, queryObj, RequestContr
 }
 
 export function statQuery(category, queryObj, RequestController) {
+    log.notice("statQuery");
     return buildAndFetch(
         queryObj,
         "InfoObject",
@@ -97,6 +116,7 @@ export function statQuery(category, queryObj, RequestController) {
 }
 
 export function indexQuery(queryObj, limit, offset, RequestController) {
+    log.notice("indexQuery");
     return buildAndFetch(
         queryObj,
         "SdgMatch",
@@ -106,40 +126,37 @@ export function indexQuery(queryObj, limit, offset, RequestController) {
     );
 }
 
+function genTypeHandler(type, refType, aFilter, aHandler) {
+    return (t, i) => {
+        aFilter.push(buildUidFilter(type, i, refType));
+        aHandler.push(buildEdgeHandler(type, t, i));
+    };
+}
+
 function buildFilter(queryObj, refType) {
     if (!queryObj) {
+        log.debug("no filter, return empty result");
         return {};
     }
 
     const aFilter = [];
     const aHandler = [];
 
-    if (queryObj.sdgs && queryObj.sdgs.length) {
-        queryObj.sdgs.forEach((t, i) => {
-            aFilter.push(buildUidFilter("sdg", i, refType));
-            aHandler.push(buildEdgeHandler("sdg", t, i));
-        });
-    }
-
-    if (queryObj.departments && queryObj.departments.length) {
-        queryObj.departments.forEach((t, i) => {
-            aFilter.push(buildUidFilter("department", i, refType));
-            aHandler.push(buildEdgeHandler("department", t, i));
-        });
-    }
-
-    if (queryObj.persons && queryObj.persons.length) {
-        queryObj.persons.forEach((t, i) => {
+    const typeHandler = {
+        sdgs: genTypeHandler("sdg", refType, aFilter, aHandler),
+        departments: genTypeHandler("department", refType, aFilter, aHandler),
+        lang: (t) => aFilter.push(buildLangFilter(t, refType)),
+        persons: (t, i) => {
             aFilter.push(buildUidFilter("person", i, refType));
             aHandler.push(buildPersonHandler(t, i));
-        });
-    }
+        }
+    };
 
-    if (queryObj.lang && queryObj.lang.length) {
-        queryObj.lang.forEach((t) => {
-            aFilter.push(buildLangFilter(t, refType));
-        });
-    }
+    Object.keys(queryObj).forEach((key) => {
+        if (key in typeHandler) {
+            queryObj[key].forEach(typeHandler[key]);
+        }
+    });
 
     if (refType === "SdgMatch") {
         const tf = buildMatchTermFilter(queryObj);
@@ -171,27 +188,27 @@ function buildFilter(queryObj, refType) {
     };
 }
 
-function mainSelector(filter) {
-    filter = filter && filter.length ? ` @filter(${filter})` : "";
+// function mainSelector(filter) {
+//     filter = filter && filter.length ? ` @filter(${filter})` : "";
 
-    const aHelper = filter.length ? `aph as var(func: type(Author)) @cascade { Author.objects${filter} { uid } }` : "";
-    const pHelper = filter.length ? " @filter(uid_in(Person.pseudonyms, uid(aph)))" : "";
+//     const aHelper = filter.length ? `aph as var(func: type(Author)) @cascade { Author.objects${filter} { uid } }` : "";
+//     const pHelper = filter.length ? " @filter(uid_in(Person.pseudonyms, uid(aph)))" : "";
 
-    return `
-    ${aHelper}
-    infoobjecttype(func: type(InfoObjectType)) {
-        name: InfoObjectType.name
-        n: count(InfoObjectType.objects${filter})
-    }
-    
-    lang(func: type(InfoObject)) ${filter} @groupby(lang: InfoObject.language) {
-        n: count(uid)
-    }
+//     return `
+//     ${aHelper}
+//     infoobjecttype(func: type(InfoObjectType)) {
+//         name: InfoObjectType.name
+//         n: count(InfoObjectType.objects${filter})
+//     }
 
-    people(func: has(Person.pseudonyms))${pHelper} {
-        n: count(uid)
-    }`;
-}
+//     lang(func: type(InfoObject)) ${filter} @groupby(lang: InfoObject.language) {
+//         n: count(uid)
+//     }
+
+//     people(func: has(Person.pseudonyms))${pHelper} {
+//         n: count(uid)
+//     }`;
+// }
 
 function statSelector(filter, options) {
     // limit and offset are deliberately ignored in this query
@@ -255,10 +272,25 @@ function objectSelector(filter, options) {
     const {category, limit, offset} = options;
 
     filter = filter && filter.length ? ` @filter(${filter})` : "";
+    let extras = [];
+
+    if (limit !== undefined) {
+        extras.push(`first: ${limit}`);
+    }
+
+    if (offset !== undefined) {
+        extras.push(`offset: ${offset}`);
+    }
+    
+    if (extras.length) {
+        extras.push("");
+    }
+
+    const constraints = extras.join(", ");
 
     return `
     category(func: eq(InfoObjectType.name, ${JSON.stringify(category)})) {
-        objects: InfoObjectType.objects(first: ${limit}, offset: ${offset},  orderdesc: InfoObject.year) 
+        objects: InfoObjectType.objects(${constraints} orderdesc: InfoObject.year) 
         ${filter}
         {
           link: InfoObject.link
@@ -266,6 +298,7 @@ function objectSelector(filter, options) {
           abstract: InfoObject.abstract
           extras: InfoObject.extras
           year: InfoObject.year
+          language: InfoObject.language,
           authors: InfoObject.authors {
             fullname: Author.fullname
             person: Author.person {
@@ -278,10 +311,10 @@ function objectSelector(filter, options) {
                 }
             }
           }
-          department: InfoObject.departments {
+          departments: InfoObject.departments {
             id: Department.id
           }
-          sdg: InfoObject.sdgs {
+          sdgs: InfoObject.sdgs {
             id: Sdg.id
           }
           keywords: InfoObject.keywords {
@@ -290,19 +323,9 @@ function objectSelector(filter, options) {
           subtype: InfoObject.subtype {
             name: InfoObjectSubType.name 
           }
-          classification: InfoObject.class { 
-            itemid: PublicationClass.id 
+          class: InfoObject.class { 
+            id: PublicationClass.id 
             name: PublicationClass.name 
-          }
-          matches: InfoObject.sdg_matches {
-            matchid: SdgMatch.construct
-            keyword: SdgMatch.keyword
-            required: SdgMatch.required_context
-            forbidden: SdgMatch.forbidden_context
-            lang: SdgMatch.language
-            mark: SdgMatch.sdg { 
-                id: Sdg.id
-            }
           }
         }
     }`;

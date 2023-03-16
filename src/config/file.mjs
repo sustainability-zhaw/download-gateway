@@ -108,8 +108,8 @@ export default class FileBackend {
         );
     }
 
-    get frontend() {
-        return this.#config?.frontend;
+    get service() {
+        return this.#config?.service;
     }
 
     get backend() {
