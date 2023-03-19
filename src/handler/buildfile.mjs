@@ -5,7 +5,7 @@ import { mainQuery } from "../models/DqlFilter.mjs";
 
 const mimetype = "application/vnd.ms-excel";
 // the file name must container no spaces, otherwise we would need quotes.
-const filename = "name_of_excel_file.xls";
+const filename = "data_export.xls";
 
 const log = getLogger("handler/buildfile");
 
@@ -21,7 +21,7 @@ export async function buildfile(ctx, next) {
 
         ctx.body = await workbook.xlsx.writeBuffer();
     }
-    catch (err) {
+    catch (err) {   
         log.error({
             info: "failed to build file",
             error: err.message
