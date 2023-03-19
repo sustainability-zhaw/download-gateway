@@ -29,6 +29,10 @@ The service sets the `content-disposition` header with the name of the file. Cur
 
 The frontend UI needs to trigger the download of the received workbook blob. 
 
+## Deployment
+
+An example deployment can be found in the `contrib`-folger. The docker-compose-file `dev.yaml` can be used alongside with the services of [the integration test suite](https://github.com/sustainability-zhaw/integration-test).
+
 ## Configuration
 
 The configuration is simple.
@@ -43,9 +47,6 @@ debug:
 - `service.dbhost` is a simple string with the hostname and port of the database service/API gateway.
 - `debug.level` sets the debug level of the system. Default value is `notice`. The download gateway uses [my service logger](https://github.com/phish108/node-service-logger) for logging with the respective logging levels. 
 
-## Deployment
-
-An example deployment can be found in the `contrib`-folger. The docker-compose-file `dev.yaml` can be used alongside with the services of [the integration test suite](https://github.com/sustainability-zhaw/integration-test).
 
 ### Debug levels 
 
