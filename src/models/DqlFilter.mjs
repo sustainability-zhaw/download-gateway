@@ -5,7 +5,8 @@ const log = getLogger("models/DQLFilter");
 const settings = {};
 
 export function init(config) {
-    if (!("dbhost" in config)) {
+    if (!(config && "dbhost" in config)) {
+        log.error({info: "no database config found", config});
         throw new Error("no dbhost found");
     }
 
