@@ -5,7 +5,7 @@ import { mainQuery } from "../models/DqlFilter.mjs";
 
 const mimetype = "application/vnd.ms-excel";
 // the file name must container no spaces, otherwise we would need quotes.
-const filename = "data_export.xls";
+const filename = "sdg_dashboard_export.xlsx";
 
 const log = getLogger("handler/buildfile");
 
