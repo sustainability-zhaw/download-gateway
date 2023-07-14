@@ -7,31 +7,34 @@ const allowedQueries = {
     terms: () => {},
     departments: (q) => {
         q = q.replace("\"", "").replace("department_", "");
+        log.debug({info: "checking department", department: q});
         if (!["A", "G", "L", "N", "P", "S", "T", "W", "R", "V"].includes(q)) {
             throw new Error("Invalid Department");
         }
     },
     sdgs: (q) => {
         q = q.replace("\"", "").replace("sdg_", "");
+        log.debug({info: "checking sdg", sdg: q});
         try {
             q = parseInt(q);
         }
         catch (error) {
             throw new Error("Invalid SDG");
         }
-
         if (q < 1 || q > 16 ) {
             throw new Error("Invalid SDG");
         }
     },
     lang: (q) => {
         q = q.replace("\"", "");
+        log.debug({info: "checking lang", lang: q});
         if (q.length !== 2) {
             throw new Error("Invalid language code");
         }
     },
     persons: (q) => {
         q = q.replace("\"", "");
+        log.debug({info: "checking person", person: q});
         if (q.length !== 4) {
             throw new Error("Invalid person initials");
         }
