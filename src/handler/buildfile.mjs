@@ -21,7 +21,7 @@ export async function buildfile(ctx, next) {
 
         ctx.body = await workbook.xlsx.writeBuffer();
     }
-    catch (err) {   
+    catch (err) {
         log.error({
             info: "failed to build file",
             error: err.message

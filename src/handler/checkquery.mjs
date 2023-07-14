@@ -6,14 +6,14 @@ const allowedQueries = {
     notterms: () => {},
     terms: () => {},
     departments: (q) => {
-        q = q.replace("\"", "").replace("department_", "");
+        q = q.replaceAll("\"", "").replace("department_", "");
         log.debug({info: "checking department", department: q});
         if (!["A", "G", "L", "N", "P", "S", "T", "W", "R", "V"].includes(q)) {
             throw new Error("Invalid Department");
         }
     },
     sdgs: (q) => {
-        q = q.replace("\"", "").replace("sdg_", "");
+        q = q.replaceAll("\"", "").replace("sdg_", "");
         log.debug({info: "checking sdg", sdg: q});
         try {
             q = parseInt(q);
@@ -26,14 +26,14 @@ const allowedQueries = {
         }
     },
     lang: (q) => {
-        q = q.replace("\"", "");
+        q = q.replaceAll("\"", "");
         log.debug({info: "checking lang", lang: q});
         if (q.length !== 2) {
             throw new Error("Invalid language code");
         }
     },
     persons: (q) => {
-        q = q.replace("\"", "");
+        q = q.replaceAll("\"", "");
         log.debug({info: "checking person", person: q});
         if (q.length !== 4) {
             throw new Error("Invalid person initials");
@@ -50,6 +50,7 @@ function verifyQuery(query) {
         return q;
     }, query);
 
+    // should pass without errors
     Object.keys(query).forEach((k) => {
         query[k].map(allowedQueries[k]);
     });
