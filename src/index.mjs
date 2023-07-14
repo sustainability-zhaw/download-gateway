@@ -41,13 +41,13 @@ async function setup_service() {
     ]));
 
     router.post("/", koaBody.koaBody(), KoaCompose([
-        // normally we will not enter here
+        // normally we will enter here
         logHeader,
         checkquery,
         buildfile,
         logRequest
     ]));
-    
+
     router.put("/", koaBody.koaBody(), KoaCompose([
         // normally we will not enter here
         logHeader,

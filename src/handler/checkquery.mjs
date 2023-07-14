@@ -6,21 +6,32 @@ const allowedQueries = {
     notterms: () => {},
     terms: () => {},
     departments: (q) => {
+        q = q.replace("\"", "").replace("department_", "");
         if (!["A", "G", "L", "N", "P", "S", "T", "W", "R", "V"].includes(q)) {
             throw new Error("Invalid Department");
         }
     },
     sdgs: (q) => {
+        q = q.replace("\"", "").replace("sdg_", "");
+        try {
+            q = parseInt(q);
+        }
+        catch (error) {
+            throw new Error("Invalid SDG");
+        }
+
         if (q < 1 || q > 16 ) {
             throw new Error("Invalid SDG");
         }
     },
     lang: (q) => {
+        q = q.replace("\"", "");
         if (q.length !== 2) {
             throw new Error("Invalid language code");
         }
     },
     persons: (q) => {
+        q = q.replace("\"", "");
         if (q.length !== 4) {
             throw new Error("Invalid person initials");
         }
@@ -28,6 +39,7 @@ const allowedQueries = {
 };
 
 function verifyQuery(query) {
+    // delete invalid keys
     query = Object.keys(query).reduce((q, k) => {
         if (!(k in allowedQueries && q[k].length)) {
             delete q[k];
