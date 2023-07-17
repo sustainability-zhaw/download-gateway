@@ -419,11 +419,12 @@ function buildTermFilter(type, term) {
         term = term.replace(/^"\\|"$/, ""); // remove internal quotes and helpers
 
         const quotechar = term.match(/^['"]/)[0];
-        const regex = new RegExp(`^${quotechar}([^${quotechar}]*?)(?:${quotechar}.*)?$`);
+        const regex = new RegExp(`^${quotechar}([^${quotechar}]*?)(?:\\${quotechar}.*)?$`);
 
         console.log(`quoted term: ${term}`);
 
         term = term.trim()
+            .replace(/\\['"]/g, `${quotechar}`) // drop quoted quotes
             .replace(regex, "$1")
             .replace(/\s+/g, " ")
             .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
