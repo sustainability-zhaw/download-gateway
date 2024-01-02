@@ -3,6 +3,8 @@ import {getLogger} from "service_logger";
 const log = getLogger("handler/checkquery");
 
 const allowedQueries = {
+    classifications: () => {},
+    subtypes: () => {},
     notterms: () => {},
     terms: () => {},
     departments: (q) => {

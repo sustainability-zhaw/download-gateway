@@ -153,11 +153,27 @@ function buildFilter(queryObj, refType) {
         persons: (t, i) => {
             aFilter.push(buildUidFilter("person", i, refType));
             aHandler.push(buildPersonHandler(t, i));
+        },
+        subtypes: (subtypes) => {
+            const orFilter = [];
+            subtypes.forEach((st, i) => {
+                orFilter.push(`uid_in(InfoObject.subtype, uid(sh${i}))`);
+                aHandler.push(`sh${i} as var(func: type(InfoObjectSubType)) @filter(eq(InfoObjectSubType.name, ${st})) { uid }`);
+            });
+            aFilter.push(`(${orFilter.join(" or ")})`);
+        },
+        classifications: (t, i) => {
+            aFilter.push(`uid_in(InfoObject.class, uid(ch${i}))`);
+            aHandler.push(`ch${i} as var(func: type(PublicationClass)) @filter(eq(PublicationClass.id, ${t})) { uid }`);
         }
     };
 
     Object.keys(queryObj).forEach((key) => {
         if (key in typeHandler) {
+            if (key === "subtypes") {
+                typeHandler[key](queryObj[key]);
+                return;
+            }
             queryObj[key].forEach(typeHandler[key]);
         }
     });
